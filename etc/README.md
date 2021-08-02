@@ -4,8 +4,8 @@
 
 ```
 cd /opt
-sudo mkdir -p /opt/huemon
-sudo chown -R pi:pi /opt/huemon
+sudo mkdir /opt/huemon
+sudo chown pi:pi /opt/huemon
 git clone https://github.com/sqren/huemon.git
 ```
 
@@ -32,6 +32,9 @@ ELASTIC_CLOUD_ID = somename:abcd==
 # Create service file for systemd
 sudo cp /opt/huemon/etc/huemon.service /etc/systemd/system/huemon.service
 
+# Restart after changing systemd file
+sudo systemctl daemon-reload
+
 # Start
 sudo systemctl start huemon
 
@@ -43,7 +46,4 @@ sudo systemctl status huemon
 
 # View logs
 journalctl -fu huemon.service -n 100
-
-# Restart after changing systemd file
-sudo systemctl daemon-reload
 ```
