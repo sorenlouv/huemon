@@ -1,0 +1,20 @@
+# /etc/systemd/system/huemon.service
+# service file for Hue Monitor
+# https://github.com/sqren/huemon
+
+[Unit]
+Description=Hue Monitor
+ConditionPathExists=/opt/huemon
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/opt/huemon
+ExecStart=/usr/bin/yarn start
+Restart=always
+RestartSec=10
+StartLimitInterval=60s
+
+[Install]
+WantedBy=multi-user.target
