@@ -33,7 +33,7 @@ module.exports = {
         ],
       },
     ],
-    'no-console': 'error',
+
     // prefer typescript specific `no-unused-vars` rule
     'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': ['error'],
