@@ -134,7 +134,9 @@ async function deleteDataStreamAndIndexTemplate(esClient: Client) {
 
 async function init() {
   const esClient = getEsClient();
-  await deleteDataStreamAndIndexTemplate(esClient);
+  if (envConfig.resetOnStartup) {
+    await deleteDataStreamAndIndexTemplate(esClient);
+  }
   await createIndexTemplate(esClient);
 
   setInterval(async () => {
@@ -146,8 +148,8 @@ async function init() {
 
 init()
   .then(() => {
-    console.log('Booted successfully');
+    console.log('Hue monitor started');
   })
   .catch((e) => {
-    console.error('Boot failed', e);
+    console.error('Hue monitor failed to start', e);
   });

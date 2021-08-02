@@ -26,6 +26,7 @@ export function getEnvConfig() {
       dataStreamName: process.env.DATA_STREAM_NAME as string,
       indexTemplateName: process.env.INDEX_TEMPLATE_NAME as string,
     },
+    resetOnStartup: process.env.RESET_ON_STARTUP === 'true',
   };
 
   if (
