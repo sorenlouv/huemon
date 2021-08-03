@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 
+export type EnvConfig = ReturnType<typeof getEnvConfig>;
 export function getEnvConfig() {
   const dotEnvConfig = dotenv.config();
 
@@ -13,6 +14,11 @@ export function getEnvConfig() {
   }
 
   const config = {
+    awair: {
+      device_type: process.env.AWAIR_DEVICE_TYPE,
+      device_id: process.env.AWAIR_DEVICE_ID,
+      token: process.env.AWAIR_TOKEN,
+    },
     hue: {
       api: {
         host: process.env.HUE_API_HOST,
@@ -23,8 +29,6 @@ export function getEnvConfig() {
       username: process.env.ELASTIC_USERNAME as string,
       password: process.env.ELASTIC_PASSWORD as string,
       cloudId: process.env.ELASTIC_CLOUD_ID as string,
-      dataStreamName: process.env.DATA_STREAM_NAME || 'hue-lights',
-      indexTemplateName: process.env.INDEX_TEMPLATE_NAME || 'hue-lights',
     },
     resetOnStartup: process.env.RESET_ON_STARTUP === 'true',
   };
