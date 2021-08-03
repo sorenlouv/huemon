@@ -7,6 +7,8 @@ cd /opt
 sudo mkdir /opt/huemon
 sudo chown pi:pi /opt/huemon
 git clone https://github.com/sqren/huemon.git
+cd huemon
+yarn
 ```
 
 ### Create Config
