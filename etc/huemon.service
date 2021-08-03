@@ -10,8 +10,11 @@ After=network.target
 [Service]
 Type=simple
 User=pi
+Environment=NODE_VERSION=14
+StandardOutput=file:/opt/huemon/output.log
+StandardError=file:/opt/huemon/error.log
 WorkingDirectory=/opt/huemon
-ExecStart=/usr/bin/yarn start
+ExecStart=/home/pi/.nvm/nvm-exec /usr/bin/yarn start
 Restart=always
 RestartSec=10
 StartLimitInterval=60s
