@@ -11,13 +11,13 @@ export const awairJob: Job = {
     properties: {
       timestamp: { type: 'date' },
       score: { type: 'float' },
-      indices: {
+      sensorScores: {
         properties: {
-          co2: { type: 'float' },
-          humid: { type: 'float' },
-          pm25: { type: 'float' },
-          temp: { type: 'float' },
-          voc: { type: 'float' },
+          co2: { type: 'byte' },
+          humid: { type: 'byte' },
+          pm25: { type: 'byte' },
+          temp: { type: 'byte' },
+          voc: { type: 'byte' },
         },
       },
       sensors: {
@@ -51,7 +51,7 @@ export const awairJob: Job = {
       return memo;
     }, {} as Record<string, number>);
 
-    const indices = firstItem.indices.reduce((memo, { comp, value }) => {
+    const sensorScores = firstItem.indices.reduce((memo, { comp, value }) => {
       memo[comp] = value;
       return memo;
     }, {} as Record<string, number>);
@@ -61,7 +61,7 @@ export const awairJob: Job = {
         '@timestamp': firstItem.timestamp,
         score: firstItem.score,
         sensors,
-        indices,
+        sensorScores,
       },
     ];
   },
