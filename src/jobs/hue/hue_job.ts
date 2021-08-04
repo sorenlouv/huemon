@@ -25,7 +25,9 @@ export const hueJob: Job = {
 
   getDocs: async (envConfig: EnvConfig) => {
     const res = (await got
-      .get(`${envConfig.hue.api.host}/api/${envConfig.hue.api.key}/lights`)
+      .get(`${envConfig.hue.api.host}/api/${envConfig.hue.api.key}/lights`, {
+        timeout: { request: 5000 },
+      })
       .json()) as HueApiLight;
 
     const lights = Object.values(res).map((light) => {

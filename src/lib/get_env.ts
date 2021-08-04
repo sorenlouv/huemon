@@ -30,7 +30,6 @@ export function getEnvConfig() {
       password: process.env.ELASTIC_PASSWORD as string,
       cloudId: process.env.ELASTIC_CLOUD_ID as string,
     },
-    resetOnStartup: process.env.RESET_ON_STARTUP === 'true',
   };
 
   if (

@@ -39,6 +39,7 @@ export const awairJob: Job = {
       .get(
         `https://developer-apis.awair.is/v1/users/self/devices/${awair.device_type}/${awair.device_id}/air-data/latest`,
         {
+          timeout: { request: 5000 },
           headers: { Authorization: `Bearer ${awair.token}` },
         }
       )

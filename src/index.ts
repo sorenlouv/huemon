@@ -1,31 +1,10 @@
-import { awairJob } from './jobs/awair/awair_job';
-import { hueJob } from './jobs/hue/hue_job';
-import {
-  bulkIngest,
-  deleteDataStreamAndIndexTemplate,
-  getEsClient,
-} from './lib/elasticsearch';
+import { jobs } from './jobs/jobs';
+import { bulkIngest, getEsClient } from './lib/elasticsearch';
 import { getEnvConfig } from './lib/get_env';
-
-const jobs = [hueJob, awairJob];
 
 async function init() {
   const envConfig = getEnvConfig();
   const esClient = getEsClient(envConfig);
-
-  if (envConfig.resetOnStartup) {
-    await Promise.all(
-      jobs.map((job) => {
-        console.log(
-          `Job: "${job.indexTemplateName}": Deleting index template and data`
-        );
-        return deleteDataStreamAndIndexTemplate(
-          esClient,
-          job.indexTemplateName
-        );
-      })
-    );
-  }
 
   jobs.map(async (job) => {
     console.log(`Job: "${job.indexTemplateName}": Creating index template`);
@@ -44,19 +23,22 @@ async function init() {
   });
 
   jobs.map(async (job) => {
+    const fn = async () => {
+      try {
+        const docs = await job.getDocs(envConfig);
+        await bulkIngest(esClient, docs, job.indexTemplateName);
+      } catch (e) {
+        console.error(`Job "${job.indexTemplateName}": An error occurred`, e);
+      }
+    };
+
     console.log(
       `Job "${job.indexTemplateName}": Starting interval at ${
         job.interval / 1000
       }s`
     );
-
-    const docs = await job.getDocs(envConfig);
-    await bulkIngest(esClient, docs, job.indexTemplateName);
-
-    setInterval(async () => {
-      const docs = await job.getDocs(envConfig);
-      await bulkIngest(esClient, docs, job.indexTemplateName);
-    }, job.interval);
+    await fn();
+    setInterval(fn, job.interval);
   });
 }
 

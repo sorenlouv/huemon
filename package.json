@@ -13,7 +13,8 @@
     "prepare": "husky install",
     "prepublishOnly": "tsc",
     "test": "jest",
-    "start": "ts-node --transpile-only ./src/index.ts"
+    "start": "ts-node --transpile-only ./src/index.ts",
+    "reset": "ts-node --transpile-only ./src/reset.ts"
   },
   "lint-staged": {
     "*.ts": [
