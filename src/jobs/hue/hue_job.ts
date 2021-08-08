@@ -11,6 +11,7 @@ export const hueJob: Job = {
     properties: {
       name: { type: 'keyword' },
       '@timestamp': { type: 'date' },
+      hourOfDay: { type: 'byte' },
       state: {
         dynamic: false,
         properties: {
@@ -30,10 +31,12 @@ export const hueJob: Job = {
       })
       .json()) as HueApiLight;
 
+    const now = new Date();
     const lights = Object.values(res).map((light) => {
       return {
         name: light.name,
-        '@timestamp': new Date().toISOString(),
+        '@timestamp': now.toISOString(),
+        hourOfDay: now.getHours(),
         state: {
           reachable: light.state.reachable,
           on: light.state.on,

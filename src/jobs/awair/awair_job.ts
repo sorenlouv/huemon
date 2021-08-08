@@ -9,7 +9,8 @@ export const awairJob: Job = {
   indexTemplateMappings: {
     dynamic: false,
     properties: {
-      timestamp: { type: 'date' },
+      '@timestamp': { type: 'date' },
+      hourOfDay: { type: 'byte' },
       score: { type: 'float' },
       sensorScores: {
         properties: {
@@ -60,6 +61,7 @@ export const awairJob: Job = {
     return [
       {
         '@timestamp': firstItem.timestamp,
+        hourOfDay: new Date(firstItem.timestamp).getHours(),
         score: firstItem.score,
         sensors,
         sensorScores,
