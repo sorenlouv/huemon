@@ -40,5 +40,9 @@ export async function createIndexPattern(
     })
     .json();
 
+  console.log(
+    `Created Kibana index pattern: "${indexPattern.index_pattern.title}"`
+  );
+
   return res;
 }
