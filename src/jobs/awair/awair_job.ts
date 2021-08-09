@@ -1,5 +1,6 @@
 import got from 'got';
 import { Job } from '../../lib/Job';
+import { createIndexPattern } from '../../lib/create_index_pattern';
 import { EnvConfig } from '../../lib/get_env';
 import { AwairApiResponse } from './api_sample';
 
@@ -31,6 +32,15 @@ export const awairJob: Job = {
         },
       },
     },
+  },
+
+  createKibanaAssets: (envConfig: EnvConfig) => {
+    return createIndexPattern(envConfig, {
+      override: true,
+      index_pattern: {
+        title: `${awairJob.indexTemplateName}*`,
+      },
+    });
   },
 
   getDocs: async (envConfig: EnvConfig) => {

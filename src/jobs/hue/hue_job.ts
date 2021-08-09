@@ -1,5 +1,6 @@
 import got from 'got';
 import { Job } from '../../lib/Job';
+import { createIndexPattern } from '../../lib/create_index_pattern';
 import { EnvConfig } from '../../lib/get_env';
 import { HueApiLight } from './api_sample';
 
@@ -22,6 +23,15 @@ export const hueJob: Job = {
         },
       },
     },
+  },
+
+  createKibanaAssets: (envConfig: EnvConfig) => {
+    return createIndexPattern(envConfig, {
+      override: true,
+      index_pattern: {
+        title: `${hueJob.indexTemplateName}*`,
+      },
+    });
   },
 
   getDocs: async (envConfig: EnvConfig) => {

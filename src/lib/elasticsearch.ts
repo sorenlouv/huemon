@@ -53,7 +53,10 @@ export async function deleteDataStreamAndIndexTemplate(
     }
   }
 
-  // delete if exists
+  // delete indices
+  await esClient.indices.delete({ index: `${indexTemplateName}*` });
+
+  // delete template index if exists
   const res = await esClient.indices.existsIndexTemplate({
     name: indexTemplateName,
   });

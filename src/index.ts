@@ -6,7 +6,8 @@ async function init() {
   const envConfig = getEnvConfig();
   const esClient = getEsClient(envConfig);
 
-  jobs.map(async (job) => {
+  const promises = jobs.map(async (job) => {
+    // setup ES (index templates, data streams etc)
     console.log(`Job: "${job.indexTemplateName}": Creating index template`);
     await esClient.indices.putIndexTemplate({
       name: job.indexTemplateName,
@@ -20,9 +21,13 @@ async function init() {
         },
       },
     });
-  });
 
-  jobs.map(async (job) => {
+    // set kibana (index patterns, visualisations etc)
+    if (job.createKibanaAssets) {
+      await job.createKibanaAssets(envConfig);
+    }
+
+    // ingest data
     const fn = async () => {
       try {
         const docs = await job.getDocs(envConfig);
@@ -38,8 +43,11 @@ async function init() {
       }s`
     );
     await fn();
+
     setInterval(fn, job.interval);
   });
+
+  return Promise.all(promises);
 }
 
 init()
