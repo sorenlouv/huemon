@@ -2,7 +2,9 @@ import { Client } from '@elastic/elasticsearch';
 import { jobs } from './jobs/jobs';
 import { getEsClient } from './lib/elasticsearch';
 import { getEnvConfig } from './lib/get_env';
-import { deleteIndexPattern } from './lib/kibana';
+import { deleteIndexPattern, getIndexPatternId } from './lib/kibana';
+
+const SHOULD_DELETE_INDEX_PATTERN = false;
 
 async function reset() {
   const envConfig = getEnvConfig();
@@ -11,8 +13,13 @@ async function reset() {
   await Promise.all(
     jobs.flatMap((job) => {
       console.log(`Job: "${job.indexTemplateName}": Resetting`);
+      const indexPatternId = getIndexPatternId(job.indexTemplateName);
+
       return [
-        deleteIndexPattern(envConfig, `${job.indexTemplateName}*`),
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        ...(SHOULD_DELETE_INDEX_PATTERN
+          ? [deleteIndexPattern(envConfig, indexPatternId)]
+          : []),
         deleteDataStreamAndIndexTemplate(esClient, job.indexTemplateName),
       ];
     })
@@ -25,6 +32,11 @@ reset()
   })
   .catch((e) => {
     console.error('❌ Reset failed', e);
+
+    if (e.response) {
+      console.log(e.request.options.url.href);
+      console.log(e.response.body);
+    }
   });
 
 async function deleteDataStreamAndIndexTemplate(

@@ -17,7 +17,9 @@ interface IndexPattern {
   override?: boolean;
   refresh_fields?: boolean;
   index_pattern: {
+    id: string;
     title: string;
+    timeFieldName: string;
   };
 }
 
@@ -47,17 +49,22 @@ export async function createIndexPattern(
   return res;
 }
 
+export function getIndexPatternId(indexTemplateName: string) {
+  return `${indexTemplateName}_index_pattern_id`;
+}
+
 export async function deleteIndexPattern(
   envConfig: EnvConfig,
-  indexPatternTitle: string
+  indexPatternId: string
 ) {
   const { username, password, cloudId } = envConfig.elastic;
   const { kibanaHost } = parseCloudId(cloudId);
 
-  const res = await got
-    .post(
-      `${kibanaHost}/api/index_patterns/index_pattern/${indexPatternTitle}`,
+  try {
+    await got.delete(
+      `${kibanaHost}/api/index_patterns/index_pattern/${indexPatternId}`,
       {
+        json: {},
         timeout: { request: 5000 },
         username,
         password,
@@ -65,10 +72,16 @@ export async function deleteIndexPattern(
           'kbn-xsrf': 'true',
         },
       }
-    )
-    .json();
+    );
 
-  console.log(`Deleted Kibana index pattern: "${indexPatternTitle}"`);
+    console.log(`Deleted Kibana index pattern: "${indexPatternId}"`);
+  } catch (e) {
+    const alreadyDeleted = e.response.statusCode === 404;
+    if (alreadyDeleted) {
+      console.log(`Index pattern "${indexPatternId}" does not exist`);
+      return;
+    }
 
-  return res;
+    throw e;
+  }
 }

@@ -1,12 +1,15 @@
 import got from 'got';
 import { Job } from '../../lib/Job';
 import { EnvConfig } from '../../lib/get_env';
-import { createIndexPattern } from '../../lib/kibana';
 import { AwairApiResponse } from './api_sample';
 
 export const awairJob: Job = {
   interval: 1000 * 60 * 5,
   indexTemplateName: 'awair',
+  indexPattern: {
+    title: 'awair*',
+    timeFieldName: '@timestamp',
+  },
   indexTemplateMappings: {
     dynamic: false,
     properties: {
@@ -33,15 +36,6 @@ export const awairJob: Job = {
         },
       },
     },
-  },
-
-  createKibanaAssets: (envConfig: EnvConfig) => {
-    return createIndexPattern(envConfig, {
-      override: true,
-      index_pattern: {
-        title: `${awairJob.indexTemplateName}*`,
-      },
-    });
   },
 
   getDocs: async (envConfig: EnvConfig) => {

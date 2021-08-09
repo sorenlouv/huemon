@@ -1,6 +1,7 @@
 import { jobs } from './jobs/jobs';
 import { bulkIngest, getEsClient } from './lib/elasticsearch';
 import { getEnvConfig } from './lib/get_env';
+import { createIndexPattern, getIndexPatternId } from './lib/kibana';
 
 async function init() {
   const envConfig = getEnvConfig();
@@ -22,11 +23,6 @@ async function init() {
       },
     });
 
-    // set kibana (index patterns, visualisations etc)
-    if (job.createKibanaAssets) {
-      await job.createKibanaAssets(envConfig);
-    }
-
     // ingest data
     const fn = async () => {
       try {
@@ -44,6 +40,19 @@ async function init() {
     );
     await fn();
 
+    // create Kibana index pattern
+    if (job.indexPattern) {
+      await createIndexPattern(envConfig, {
+        override: true,
+        refresh_fields: true,
+        index_pattern: {
+          id: getIndexPatternId(job.indexTemplateName),
+          title: job.indexPattern.title,
+          timeFieldName: job.indexPattern.timeFieldName,
+        },
+      });
+    }
+
     setInterval(fn, job.interval);
   });
 
@@ -56,4 +65,8 @@ init()
   })
   .catch((e) => {
     console.error('Huemon failed to start', e);
+
+    if (e.response) {
+      console.log(e.response);
+    }
   });

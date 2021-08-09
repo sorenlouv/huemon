@@ -1,16 +1,27 @@
 import got from 'got';
 import { Job } from '../../lib/Job';
 import { EnvConfig } from '../../lib/get_env';
-import { createIndexPattern } from '../../lib/kibana';
 import { HueApiLight } from './api_sample';
 
 export const hueJob: Job = {
   interval: 1000 * 60,
   indexTemplateName: 'hue-lights',
+  indexPattern: {
+    title: 'hue-lights*',
+    timeFieldName: '@timestamp',
+  },
   indexTemplateMappings: {
     dynamic: false,
     properties: {
-      name: { type: 'keyword' },
+      name: {
+        type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+          },
+        },
+      },
+      room: { type: 'keyword' },
       '@timestamp': { type: 'date' },
       hour_of_day: { type: 'byte' },
       day_of_week: { type: 'byte' },
@@ -26,15 +37,6 @@ export const hueJob: Job = {
     },
   },
 
-  createKibanaAssets: (envConfig: EnvConfig) => {
-    return createIndexPattern(envConfig, {
-      override: true,
-      index_pattern: {
-        title: `${hueJob.indexTemplateName}*`,
-      },
-    });
-  },
-
   getDocs: async (envConfig: EnvConfig) => {
     const res = (await got
       .get(`${envConfig.hue.api.host}/api/${envConfig.hue.api.key}/lights`, {
@@ -44,8 +46,10 @@ export const hueJob: Job = {
 
     const now = new Date();
     const lights = Object.values(res).map((light) => {
+      const [room] = light.name.split(',');
       return {
         name: light.name,
+        room,
         '@timestamp': now.toISOString(),
         hour_of_day: now.getHours(),
         day_of_week: now.getDay(),
