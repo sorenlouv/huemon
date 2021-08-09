@@ -10,9 +10,9 @@ export const awairJob: Job = {
     dynamic: false,
     properties: {
       '@timestamp': { type: 'date' },
-      hourOfDay: { type: 'byte' },
+      hour_of_day: { type: 'byte' },
       score: { type: 'float' },
-      sensorScores: {
+      sensor_scores: {
         properties: {
           co2: { type: 'byte' },
           humid: { type: 'byte' },
@@ -61,10 +61,10 @@ export const awairJob: Job = {
     return [
       {
         '@timestamp': firstItem.timestamp,
-        hourOfDay: new Date(firstItem.timestamp).getHours(),
+        hour_of_day: new Date(firstItem.timestamp).getHours(),
         score: firstItem.score,
         sensors,
-        sensorScores,
+        sensor_scores: sensorScores,
       },
     ];
   },

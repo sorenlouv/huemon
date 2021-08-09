@@ -11,7 +11,7 @@ export const hueJob: Job = {
     properties: {
       name: { type: 'keyword' },
       '@timestamp': { type: 'date' },
-      hourOfDay: { type: 'byte' },
+      hour_of_day: { type: 'byte' },
       state: {
         dynamic: false,
         properties: {
@@ -36,7 +36,7 @@ export const hueJob: Job = {
       return {
         name: light.name,
         '@timestamp': now.toISOString(),
-        hourOfDay: now.getHours(),
+        hour_of_day: now.getHours(),
         state: {
           reachable: light.state.reachable,
           on: light.state.on,
