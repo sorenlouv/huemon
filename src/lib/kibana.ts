@@ -46,3 +46,29 @@ export async function createIndexPattern(
 
   return res;
 }
+
+export async function deleteIndexPattern(
+  envConfig: EnvConfig,
+  indexPatternTitle: string
+) {
+  const { username, password, cloudId } = envConfig.elastic;
+  const { kibanaHost } = parseCloudId(cloudId);
+
+  const res = await got
+    .post(
+      `${kibanaHost}/api/index_patterns/index_pattern/${indexPatternTitle}`,
+      {
+        timeout: { request: 5000 },
+        username,
+        password,
+        headers: {
+          'kbn-xsrf': 'true',
+        },
+      }
+    )
+    .json();
+
+  console.log(`Deleted Kibana index pattern: "${indexPatternTitle}"`);
+
+  return res;
+}

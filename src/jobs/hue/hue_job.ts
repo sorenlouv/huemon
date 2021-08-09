@@ -1,7 +1,7 @@
 import got from 'got';
 import { Job } from '../../lib/Job';
-import { createIndexPattern } from '../../lib/create_index_pattern';
 import { EnvConfig } from '../../lib/get_env';
+import { createIndexPattern } from '../../lib/kibana';
 import { HueApiLight } from './api_sample';
 
 export const hueJob: Job = {
