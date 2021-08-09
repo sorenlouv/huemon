@@ -1,5 +1,5 @@
-export type HueApiLight = typeof hueApiLightSample;
-export const hueApiLightSample = {
+export type LightApi = typeof lightsApiSample;
+export const lightsApiSample = {
   '1': {
     state: {
       on: false,

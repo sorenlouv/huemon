@@ -4,8 +4,6 @@ import { getEsClient } from './lib/elasticsearch';
 import { getEnvConfig } from './lib/get_env';
 import { deleteIndexPattern, getIndexPatternId } from './lib/kibana';
 
-const SHOULD_DELETE_INDEX_PATTERN = false;
-
 async function reset() {
   const envConfig = getEnvConfig();
   const esClient = getEsClient(envConfig);
@@ -17,9 +15,7 @@ async function reset() {
 
       return [
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        ...(SHOULD_DELETE_INDEX_PATTERN
-          ? [deleteIndexPattern(envConfig, indexPatternId)]
-          : []),
+        deleteIndexPattern(envConfig, indexPatternId),
         deleteDataStreamAndIndexTemplate(esClient, job.indexTemplateName),
       ];
     })

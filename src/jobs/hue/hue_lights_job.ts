@@ -1,9 +1,9 @@
 import got from 'got';
 import { Job } from '../../lib/Job';
 import { EnvConfig } from '../../lib/get_env';
-import { HueApiLight } from './api_sample';
+import { LightApi } from './lights_api_sample';
 
-export const hueJob: Job = {
+export const hueLightsJob: Job = {
   interval: 1000 * 60,
   indexTemplateName: 'hue-lights',
   indexPattern: {
@@ -42,7 +42,7 @@ export const hueJob: Job = {
       .get(`${envConfig.hue.api.host}/api/${envConfig.hue.api.key}/lights`, {
         timeout: { request: 5000 },
       })
-      .json()) as HueApiLight;
+      .json()) as LightApi;
 
     const now = new Date();
     const lights = Object.values(res).map((light) => {
