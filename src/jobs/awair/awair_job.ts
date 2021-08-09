@@ -12,6 +12,7 @@ export const awairJob: Job = {
     properties: {
       '@timestamp': { type: 'date' },
       hour_of_day: { type: 'byte' },
+      day_of_week: { type: 'byte' },
       score: { type: 'float' },
       sensor_scores: {
         properties: {
@@ -68,10 +69,12 @@ export const awairJob: Job = {
       return memo;
     }, {} as Record<string, number>);
 
+    const date = new Date(firstItem.timestamp);
     return [
       {
         '@timestamp': firstItem.timestamp,
-        hour_of_day: new Date(firstItem.timestamp).getHours(),
+        hour_of_day: date.getHours(),
+        day_of_week: date.getDay(),
         score: firstItem.score,
         sensors,
         sensor_scores: sensorScores,
