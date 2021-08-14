@@ -36,7 +36,7 @@ export const hueSensorsJob: Job = {
           daylight: { type: 'boolean' },
 
           // temp sensor
-          temperature: { type: 'short' },
+          temperature: { type: 'float' },
 
           // motion sensor
           presence: { type: 'boolean' },
@@ -71,8 +71,14 @@ export const hueSensorsJob: Job = {
           day_of_week: date.getDay(),
           //@ts-expect-error: `productname` is optional
           product_name: sensor.productname,
-          //@ts-expect-error: `reachable` is optional
-          state: { ...sensor.state, reachable: sensor.config.reachable },
+          state: {
+            ...sensor.state,
+            temperature:
+              //@ts-expect-error: `temperature` is optional
+              'temperature' in sensor ? sensor.temperature / 100 : undefined,
+            //@ts-expect-error: `reachable` is optional
+            reachable: sensor.config.reachable,
+          },
           type: sensor.type,
         };
       });
