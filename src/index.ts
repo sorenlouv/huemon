@@ -1,72 +1,39 @@
+import { hideBin } from 'yargs/helpers';
+import yargs from 'yargs/yargs';
 import { jobs } from './jobs/jobs';
-import { bulkIngest, getEsClient } from './lib/elasticsearch';
-import { getEnvConfig } from './lib/get_env';
-import { createIndexPattern, getIndexPatternId } from './lib/kibana';
+import { init } from './lib/init';
+import { reset } from './reset';
 
-async function init() {
-  const envConfig = getEnvConfig();
-  const esClient = getEsClient(envConfig);
-
-  const promises = jobs.map(async (job) => {
-    // setup ES (index templates, data streams etc)
-    console.log(`Job: "${job.indexTemplateName}": Creating index template`);
-    await esClient.indices.putIndexTemplate({
-      name: job.indexTemplateName,
-      create: false, // allow updating existing template
-      body: {
-        index_patterns: [`${job.indexTemplateName}*`],
-        data_stream: {},
-        template: {
-          settings: { number_of_shards: 1 },
-          mappings: job.indexTemplateMappings,
-        },
-      },
-    });
-
-    // ingest data
-    const fn = async () => {
-      try {
-        const docs = await job.getDocs(envConfig);
-        await bulkIngest(esClient, docs, job.indexTemplateName);
-      } catch (e) {
-        console.error(`Job "${job.indexTemplateName}": An error occurred`, e);
-      }
-    };
-
-    console.log(
-      `Job "${job.indexTemplateName}": Starting interval at ${
-        job.interval / 1000
-      }s`
-    );
-    await fn();
-
-    // create Kibana index pattern
-    if (job.indexPattern) {
-      await createIndexPattern(envConfig, {
-        override: true,
-        refresh_fields: true,
-        index_pattern: {
-          id: getIndexPatternId(job.indexTemplateName),
-          title: job.indexPattern.title,
-          timeFieldName: job.indexPattern.timeFieldName,
-        },
-      });
-    }
-
-    setInterval(fn, job.interval);
-  });
-
-  return Promise.all(promises);
-}
-
-init()
-  .then(() => {
-    console.log('Huemon started');
+const { argv } = yargs(hideBin(process.argv))
+  .option('reset', {
+    default: false,
+    type: 'boolean',
+    description: 'Reset',
   })
-  .catch((e) => {
-    console.error('Huemon failed to start', e);
-
-    if (e.response) {
-      console.log(e.response);
-    }
+  .option('job', {
+    alias: 'j',
+    type: 'array',
+    string: true,
+    description: 'Start one or more jobs',
+    choices: jobs.map((job) => job.name),
   });
+
+const selectedJobs = jobs.filter((job) => {
+  if (!argv.job) {
+    return true;
+  }
+
+  return argv.job.includes(job.name);
+});
+
+const p = argv.reset ? reset(selectedJobs) : init(selectedJobs);
+p.then(() => {
+  console.log('✅ Success');
+}).catch((e) => {
+  console.error('❌ Failed', e);
+
+  if (e.response) {
+    console.log(e.request.options.url.href);
+    console.log(e.response.body);
+  }
+});

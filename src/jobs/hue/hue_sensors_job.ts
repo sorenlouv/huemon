@@ -4,6 +4,7 @@ import { EnvConfig } from '../../lib/get_env';
 import { SensorsApi } from './sensors_api_sample';
 
 export const hueSensorsJob: Job = {
+  name: 'hue-sensors',
   interval: 1000 * 60 * 5,
   indexTemplateName: 'hue-sensors',
   indexPattern: {
@@ -56,7 +57,7 @@ export const hueSensorsJob: Job = {
       })
       .json()) as SensorsApi;
 
-    const sensors = Object.values(res)
+    return Object.values(res)
       .filter((sensor) =>
         ['ZLLLightLevel', 'ZLLPresence', 'ZLLTemperature'].includes(sensor.type)
       )
@@ -74,15 +75,14 @@ export const hueSensorsJob: Job = {
           state: {
             ...sensor.state,
             temperature:
-              //@ts-expect-error: `temperature` is optional
-              'temperature' in sensor ? sensor.temperature / 100 : undefined,
+              'temperature' in sensor.state
+                ? sensor.state.temperature / 100
+                : undefined,
             //@ts-expect-error: `reachable` is optional
             reachable: sensor.config.reachable,
           },
           type: sensor.type,
         };
       });
-
-    return sensors;
   },
 };

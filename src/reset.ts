@@ -1,10 +1,10 @@
 import { Client } from '@elastic/elasticsearch';
-import { jobs } from './jobs/jobs';
+import { Job } from './lib/Job';
 import { getEsClient } from './lib/elasticsearch';
 import { getEnvConfig } from './lib/get_env';
 import { deleteIndexPattern, getIndexPatternId } from './lib/kibana';
 
-async function reset() {
+export async function reset(jobs: Job[]) {
   const envConfig = getEnvConfig();
   const esClient = getEsClient(envConfig);
 
@@ -21,19 +21,6 @@ async function reset() {
     })
   );
 }
-
-reset()
-  .then(() => {
-    console.log('✅ Reset was successful');
-  })
-  .catch((e) => {
-    console.error('❌ Reset failed', e);
-
-    if (e.response) {
-      console.log(e.request.options.url.href);
-      console.log(e.response.body);
-    }
-  });
 
 async function deleteDataStreamAndIndexTemplate(
   esClient: Client,

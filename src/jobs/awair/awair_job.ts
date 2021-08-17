@@ -4,6 +4,7 @@ import { EnvConfig } from '../../lib/get_env';
 import { AwairApiResponse } from './api_sample';
 
 export const awairJob: Job = {
+  name: 'awair',
   interval: 1000 * 60 * 5,
   indexTemplateName: 'awair',
   indexPattern: {

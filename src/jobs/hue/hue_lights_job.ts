@@ -4,6 +4,7 @@ import { EnvConfig } from '../../lib/get_env';
 import { LightApi } from './lights_api_sample';
 
 export const hueLightsJob: Job = {
+  name: 'hue-lights',
   interval: 1000 * 60,
   indexTemplateName: 'hue-lights',
   indexPattern: {
