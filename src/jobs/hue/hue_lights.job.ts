@@ -1,7 +1,7 @@
 import got from 'got';
 import { Job } from '../../lib/Job';
 import { EnvConfig } from '../../lib/get_env';
-import { LightApi } from './lights_api_sample';
+import { LightApi } from './hue_lights.sample';
 
 export const hueLightsJob: Job = {
   name: 'hue-lights',

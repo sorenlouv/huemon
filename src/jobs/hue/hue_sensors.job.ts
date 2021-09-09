@@ -1,11 +1,11 @@
 import got from 'got';
 import { Job } from '../../lib/Job';
 import { EnvConfig } from '../../lib/get_env';
-import { SensorsApi } from './sensors_api_sample';
+import { SensorsApi } from './hue_sensors.sample';
 
 export const hueSensorsJob: Job = {
   name: 'hue-sensors',
-  interval: 1000 * 60 * 5,
+  interval: 1000 * 5,
   indexTemplateName: 'hue-sensors',
   indexPattern: {
     title: 'hue-sensors*',

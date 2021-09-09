@@ -1,7 +1,7 @@
 import got from 'got';
 import { Job } from '../../lib/Job';
 import { EnvConfig } from '../../lib/get_env';
-import { AwairApiResponse } from './api_sample';
+import { AwairApiResponse } from './awair.sample';
 
 export const awairJob: Job = {
   name: 'awair',
