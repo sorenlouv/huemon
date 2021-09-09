@@ -17,7 +17,7 @@ export function getEsClient(envConfig: EnvConfig) {
 
 export async function bulkIngest(esClient: Client, docs: Doc[], job: Job) {
   const bulkBody = docs
-    .map((doc) => merge(doc, getCommonFields(job)))
+    .map((doc) => merge(doc, getCommonFields(job, doc)))
     .flatMap((doc) => [
       { index: { _index: job.indexTemplateName, op_type: 'create' } },
       doc,
