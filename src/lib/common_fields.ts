@@ -14,12 +14,18 @@ export function getCommonFields(job: Job) {
 
 export function getCommonFieldMappings(): MappingPropertyBase {
   return {
+    dynamic: false,
     properties: {
-      interval: {
+      huemon: {
         dynamic: false,
         properties: {
-          timestamp: { type: 'date' },
-          duration: { type: 'integer' },
+          interval: {
+            dynamic: false,
+            properties: {
+              timestamp: { type: 'date' },
+              duration: { type: 'integer' },
+            },
+          },
         },
       },
     },
