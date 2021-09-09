@@ -1,7 +1,10 @@
+import { merge } from 'lodash';
 import { Job } from './Job';
+import { getCommonFieldMappings } from './common_fields';
 import { bulkIngest, getEsClient } from './elasticsearch';
 import { getEnvConfig } from './get_env';
 import { createIndexPattern, getIndexPatternId } from './kibana';
+import { logger } from './logging';
 
 export async function init(jobs: Job[]) {
   const envConfig = getEnvConfig();
@@ -9,7 +12,8 @@ export async function init(jobs: Job[]) {
 
   const promises = jobs.map(async (job) => {
     // setup ES (index templates, data streams etc)
-    console.log(`Job: "${job.indexTemplateName}": Creating index template`);
+    logger.info(`Job: "${job.indexTemplateName}": Creating index template`);
+
     await esClient.indices.putIndexTemplate({
       name: job.indexTemplateName,
       create: false, // allow updating existing template
@@ -18,27 +22,27 @@ export async function init(jobs: Job[]) {
         data_stream: {},
         template: {
           settings: { number_of_shards: 1 },
-          mappings: job.indexTemplateMappings,
+          mappings: merge(job.indexTemplateMappings, getCommonFieldMappings()),
         },
       },
     });
 
     // ingest data
-    const fn = async () => {
+    const runIngest = async () => {
       try {
         const docs = await job.getDocs(envConfig);
-        await bulkIngest(esClient, docs, job.indexTemplateName);
+        await bulkIngest(esClient, docs, job);
       } catch (e) {
-        console.error(`Job "${job.indexTemplateName}": An error occurred`, e);
+        logger.error(`Job "${job.indexTemplateName}": An error occurred`, e);
       }
     };
 
-    console.log(
+    logger.info(
       `Job "${job.indexTemplateName}": Starting interval at ${
         job.interval / 1000
       }s`
     );
-    await fn();
+    await runIngest();
 
     // create Kibana index pattern
     if (job.indexPattern) {
@@ -53,7 +57,7 @@ export async function init(jobs: Job[]) {
       });
     }
 
-    setInterval(fn, job.interval);
+    setInterval(runIngest, job.interval);
   });
 
   return Promise.all(promises);

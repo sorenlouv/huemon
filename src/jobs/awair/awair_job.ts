@@ -67,7 +67,7 @@ export const awairJob: Job = {
     const date = new Date(firstItem.timestamp);
     return [
       {
-        '@timestamp': firstItem.timestamp,
+        '@timestamp': date.toISOString(),
         hour_of_day: date.getHours(),
         day_of_week: date.getDay(),
         score: firstItem.score,

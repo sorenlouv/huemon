@@ -3,6 +3,7 @@ import { Job } from './lib/Job';
 import { getEsClient } from './lib/elasticsearch';
 import { getEnvConfig } from './lib/get_env';
 import { deleteIndexPattern, getIndexPatternId } from './lib/kibana';
+import { logger } from './lib/logging';
 
 export async function reset(jobs: Job[]) {
   const envConfig = getEnvConfig();
@@ -10,7 +11,7 @@ export async function reset(jobs: Job[]) {
 
   await Promise.all(
     jobs.flatMap((job) => {
-      console.log(`Job: "${job.indexTemplateName}": Resetting`);
+      logger.info(`Job: "${job.indexTemplateName}": Resetting`);
       const indexPatternId = getIndexPatternId(job.indexTemplateName);
 
       return [
@@ -30,10 +31,11 @@ async function deleteDataStreamAndIndexTemplate(
   try {
     await esClient.indices.getDataStream({ name: indexTemplateName });
     await esClient.indices.deleteDataStream({ name: indexTemplateName });
-    console.log(`Job "${indexTemplateName}": Deleted datastream`);
+    logger.info(`Job "${indexTemplateName}": Deleted datastream`);
   } catch (e) {
+    //@ts-expect-error
     if (e.meta.statusCode !== 404) {
-      console.log(
+      logger.info(
         `Job "${indexTemplateName}": Datastream could not be deleted`
       );
       throw e;
@@ -50,6 +52,6 @@ async function deleteDataStreamAndIndexTemplate(
 
   if (res.body) {
     await esClient.indices.deleteIndexTemplate({ name: indexTemplateName });
-    console.log(`Job "${indexTemplateName}": Index template deleted`);
+    logger.info(`Job "${indexTemplateName}": Index template deleted`);
   }
 }

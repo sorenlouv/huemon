@@ -1,5 +1,6 @@
 import got from 'got';
 import { EnvConfig } from './get_env';
+import { logger } from './logging';
 
 export function parseCloudId(cloudId: string) {
   const [instanceAlias, encodedString] = cloudId.split(':');
@@ -42,7 +43,7 @@ export async function createIndexPattern(
     })
     .json();
 
-  console.log(
+  logger.info(
     `Created Kibana index pattern: "${indexPattern.index_pattern.title}"`
   );
 
@@ -74,12 +75,14 @@ export async function deleteIndexPattern(
       }
     );
 
-    console.log(`Deleted Kibana index pattern: "${indexPatternId}"`);
+    logger.info(`Deleted Kibana index pattern: "${indexPatternId}"`);
   } catch (e) {
-    const alreadyDeleted = e.response.statusCode === 404;
-    if (alreadyDeleted) {
-      console.log(`Index pattern "${indexPatternId}" does not exist`);
-      return;
+    if (e instanceof got.HTTPError) {
+      const alreadyDeleted = e.response.statusCode === 404;
+      if (alreadyDeleted) {
+        logger.info(`Index pattern "${indexPatternId}" does not exist`);
+        return;
+      }
     }
 
     throw e;

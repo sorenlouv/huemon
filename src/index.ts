@@ -2,6 +2,7 @@ import { hideBin } from 'yargs/helpers';
 import yargs from 'yargs/yargs';
 import { jobs } from './jobs/jobs';
 import { init } from './lib/init';
+import { logger } from './lib/logging';
 import { reset } from './reset';
 
 const { argv } = yargs(hideBin(process.argv))
@@ -28,12 +29,12 @@ const selectedJobs = jobs.filter((job) => {
 
 const p = argv.reset ? reset(selectedJobs) : init(selectedJobs);
 p.then(() => {
-  console.log('✅ Success');
+  logger.info('✅ Success');
 }).catch((e) => {
-  console.error('❌ Failed', e);
+  logger.error('❌ Failed', e);
 
   if (e.response) {
-    console.log(e.request.options.url.href);
-    console.log(e.response.body);
+    logger.info(e.request.options.url.href);
+    logger.info(e.response.body);
   }
 });

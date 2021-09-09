@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import { logger } from './logging';
 
 export type EnvConfig = ReturnType<typeof getEnvConfig>;
 export function getEnvConfig() {
@@ -7,7 +8,7 @@ export function getEnvConfig() {
   if (dotEnvConfig.error) {
     // @ts-expect-error
     if (dotEnvConfig.error.code === 'ENOENT') {
-      console.error('Make sure to create a .env config file');
+      logger.error('Make sure to create a .env config file');
       process.exit(1);
     }
     throw dotEnvConfig.error;
@@ -29,6 +30,11 @@ export function getEnvConfig() {
       username: process.env.ELASTIC_USERNAME as string,
       password: process.env.ELASTIC_PASSWORD as string,
       cloudId: process.env.ELASTIC_CLOUD_ID as string,
+      apm: {
+        service_name: process.env.ELASTIC_APM_SERVICE_NAME as string,
+        secret_token: process.env.ELASTIC_APM_SECRET_TOKEN as string,
+        url: process.env.ELASTIC_APM_URL as string,
+      },
     },
   };
 
