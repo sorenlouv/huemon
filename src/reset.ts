@@ -17,41 +17,38 @@ export async function reset(jobs: Job[]) {
       return [
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         deleteIndexPattern(envConfig, indexPatternId),
-        deleteDataStreamAndIndexTemplate(esClient, job.indexTemplateName),
+        deleteDataStreamAndIndexTemplate(esClient, job),
       ];
     })
   );
 }
 
-async function deleteDataStreamAndIndexTemplate(
-  esClient: Client,
-  indexTemplateName: string
-) {
+async function deleteDataStreamAndIndexTemplate(esClient: Client, job: Job) {
   // delete datasteam if exists
   try {
-    await esClient.indices.getDataStream({ name: indexTemplateName });
-    await esClient.indices.deleteDataStream({ name: indexTemplateName });
-    logger.info(`Job "${indexTemplateName}": Deleted datastream`);
+    await esClient.indices.getDataStream({ name: job.indexTemplateName });
+    await esClient.indices.deleteDataStream({ name: job.indexTemplateName });
+    logger.info(`Job "${job.indexTemplateName}": Deleted datastream`);
   } catch (e) {
     //@ts-expect-error
     if (e.meta.statusCode !== 404) {
       logger.info(
-        `Job "${indexTemplateName}": Datastream could not be deleted`
+        `Job "${job.indexTemplateName}": Datastream could not be deleted`
       );
       throw e;
     }
   }
 
   // delete indices
-  await esClient.indices.delete({ index: `${indexTemplateName}*` });
+  await esClient.indices.delete({ index: job.indexPattern.title });
 
   // delete template index if exists
   const res = await esClient.indices.existsIndexTemplate({
-    name: indexTemplateName,
+    name: job.indexTemplateName,
   });
 
   if (res.body) {
-    await esClient.indices.deleteIndexTemplate({ name: indexTemplateName });
-    logger.info(`Job "${indexTemplateName}": Index template deleted`);
+    await esClient.indices.deleteIndexTemplate({ name: job.indexTemplateName });
+    logger.info(`Job "${job.indexTemplateName}": Index template deleted`);
   }
 }

@@ -1,7 +1,7 @@
 import { merge } from 'lodash';
 import { Job } from './Job';
 import { getCommonFieldMappings } from './common_fields';
-import { bulkIngest, getEsClient } from './elasticsearch';
+import { bulkIngest, getEsClient, rollover } from './elasticsearch';
 import { getEnvConfig } from './get_env';
 import { createIndexPattern, getIndexPatternId } from './kibana';
 import { logger } from './logging';
@@ -18,7 +18,7 @@ export async function init(jobs: Job[]) {
       name: job.indexTemplateName,
       create: false, // allow updating existing template
       body: {
-        index_patterns: [`${job.indexTemplateName}*`],
+        index_patterns: [job.indexPattern.title],
         data_stream: {},
         template: {
           settings: { number_of_shards: 1 },
@@ -26,6 +26,8 @@ export async function init(jobs: Job[]) {
         },
       },
     });
+
+    await rollover(esClient, job);
 
     // ingest data
     const runIngest = async () => {
@@ -45,17 +47,16 @@ export async function init(jobs: Job[]) {
     await runIngest();
 
     // create Kibana index pattern
-    if (job.indexPattern) {
-      await createIndexPattern(envConfig, {
-        override: true,
-        refresh_fields: true,
-        index_pattern: {
-          id: getIndexPatternId(job.indexTemplateName),
-          title: job.indexPattern.title,
-          timeFieldName: job.indexPattern.timeFieldName,
-        },
-      });
-    }
+
+    await createIndexPattern(envConfig, {
+      override: true,
+      refresh_fields: true,
+      index_pattern: {
+        id: getIndexPatternId(job.indexTemplateName),
+        title: job.indexPattern.title,
+        timeFieldName: job.indexPattern.timeFieldName,
+      },
+    });
 
     setInterval(runIngest, job.interval);
   });

@@ -15,6 +15,10 @@ export function getEsClient(envConfig: EnvConfig) {
   });
 }
 
+export async function rollover(esClient: Client, job: Job) {
+  return esClient.indices.rollover({ alias: job.indexTemplateName });
+}
+
 export async function bulkIngest(esClient: Client, docs: Doc[], job: Job) {
   const bulkBody = docs
     .map((doc) => merge(doc, getCommonFields(job, doc)))

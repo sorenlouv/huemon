@@ -6,7 +6,7 @@ export type Job = {
   indexTemplateMappings: MappingPropertyBase;
   getDocs: (envConfig: EnvConfig) => Promise<Doc[]>;
   indexTemplateName: string;
-  indexPattern?: {
+  indexPattern: {
     title: string;
     timeFieldName: string;
   };
