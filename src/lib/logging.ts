@@ -2,6 +2,15 @@ import ecsFormat from '@elastic/ecs-winston-format';
 import winston from 'winston';
 
 export const logger = winston.createLogger({
-  format: ecsFormat(),
-  transports: [new winston.transports.Console()],
+  transports: [
+    new winston.transports.File({
+      level: 'debug',
+      filename: 'combined.log',
+      format: ecsFormat({ convertReqRes: true }),
+    }),
+    new winston.transports.Console({
+      level: 'info',
+      format: winston.format.simple(),
+    }),
+  ],
 });

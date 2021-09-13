@@ -1,5 +1,5 @@
 import { MappingPropertyBase } from '@elastic/elasticsearch/api/types';
-import { Doc, Job } from './Job';
+import { Doc, Job } from './types';
 
 export function getCommonFields(job: Job, doc: Doc) {
   const now = Date.now();
@@ -34,4 +34,18 @@ export function getCommonFieldMappings(): MappingPropertyBase {
       },
     },
   };
+}
+
+export function getCommonIndexPatternFormatters() {
+  return JSON.stringify({
+    'huemon.interval.ingest_lag': {
+      id: 'duration',
+      params: {
+        inputFormat: 'milliseconds',
+        outputFormat: 'humanizePrecise',
+        outputPrecision: 0,
+        useShortSuffix: true,
+      },
+    },
+  });
 }

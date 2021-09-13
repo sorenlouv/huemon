@@ -1,6 +1,6 @@
 import got from 'got';
-import { Job } from '../../lib/Job';
 import { EnvConfig } from '../../lib/get_env';
+import { Job } from '../../lib/types';
 import { LightApi } from './hue_lights.sample';
 
 export const hueLightsJob: Job = {
@@ -45,15 +45,15 @@ export const hueLightsJob: Job = {
       })
       .json()) as LightApi;
 
-    const now = new Date();
+    const nowDate = new Date();
     const lights = Object.values(res).map((light) => {
       const [room] = light.name.split(',');
       return {
         name: light.name,
         room,
-        '@timestamp': now.toISOString(),
-        hour_of_day: now.getHours(),
-        day_of_week: now.getDay(),
+        '@timestamp': nowDate.toISOString(),
+        hour_of_day: nowDate.getHours(),
+        day_of_week: nowDate.getDay(),
         state: {
           reachable: light.state.reachable,
           on: light.state.on,

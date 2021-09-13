@@ -1,9 +1,9 @@
 import { Client } from '@elastic/elasticsearch';
 import { merge } from 'lodash';
-import { Doc, Job } from './Job';
 import { getCommonFields } from './common_fields';
 import { EnvConfig } from './get_env';
 import { logger } from './logging';
+import { Doc, Job } from './types';
 
 export function getEsClient(envConfig: EnvConfig) {
   return new Client({

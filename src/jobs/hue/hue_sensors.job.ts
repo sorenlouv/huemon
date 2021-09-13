@@ -1,6 +1,6 @@
 import got from 'got';
-import { Job } from '../../lib/Job';
 import { EnvConfig } from '../../lib/get_env';
+import { Job } from '../../lib/types';
 import { SensorsApi } from './hue_sensors.sample';
 
 export const hueSensorsJob: Job = {
@@ -51,25 +51,25 @@ export const hueSensorsJob: Job = {
   },
 
   getDocs: async (envConfig: EnvConfig) => {
-    const res = (await got
+    const res: SensorsApi = await got
       .get(`${envConfig.hue.api.host}/api/${envConfig.hue.api.key}/sensors`, {
         timeout: { request: 5000 },
       })
-      .json()) as SensorsApi;
+      .json();
 
     return Object.values(res)
       .filter((sensor) =>
         ['ZLLLightLevel', 'ZLLPresence', 'ZLLTemperature'].includes(sensor.type)
       )
       .map((sensor) => {
-        const date = new Date(`${sensor.state.lastupdated}Z`);
+        const dateNow = new Date();
         const [room] = sensor.name.split(',');
         return {
           name: sensor.name,
           room,
-          '@timestamp': date.toISOString(),
-          hour_of_day: date.getHours(),
-          day_of_week: date.getDay(),
+          '@timestamp': dateNow.toISOString(),
+          hour_of_day: dateNow.getHours(),
+          day_of_week: dateNow.getDay(),
           //@ts-expect-error: `productname` is optional
           product_name: sensor.productname,
           state: {

@@ -6,13 +6,24 @@ export type Job = {
   indexTemplateMappings: MappingPropertyBase;
   getDocs: (envConfig: EnvConfig) => Promise<Doc[]>;
   indexTemplateName: string;
-  indexPattern: {
-    title: string;
-    timeFieldName: string;
-  };
+  indexPattern: IndexPattern['index_pattern'];
   interval: number;
 };
 
 export type Doc = Record<string, unknown> & {
   '@timestamp': string;
 };
+
+export interface IndexPattern {
+  override?: boolean;
+  refresh_fields?: boolean;
+  index_pattern: {
+    // required
+    title: string;
+    timeFieldName: string;
+
+    // optional
+    id?: string;
+    fieldFormats?: string;
+  };
+}
