@@ -1,7 +1,34 @@
 import got from 'got';
 import { EnvConfig } from '../../lib/get_env';
 import { Job } from '../../lib/types';
-import { SensorsApi } from './hue_sensors.sample';
+
+type Sensor = {
+  name: string;
+  productname: string;
+  config: { reachable: boolean };
+  state: { lastupdated: string };
+} & (
+  | {
+      type: 'ZLLPresence';
+      state: {
+        presence: boolean;
+      };
+    }
+  | {
+      type: 'ZLLTemperature';
+      state: {
+        temperature: number;
+      };
+    }
+  | {
+      type: 'ZLLLightLevel';
+      state: {
+        lightlevel: number;
+        dark: boolean;
+        daylight: boolean;
+      };
+    }
+);
 
 export const hueSensorsJob: Job = {
   name: 'hue-sensors',
@@ -41,6 +68,7 @@ export const hueSensorsJob: Job = {
 
           // motion sensor
           presence: { type: 'boolean' },
+          original_presence: { type: 'boolean' },
 
           // common
           reachable: { type: 'boolean' },
@@ -51,7 +79,7 @@ export const hueSensorsJob: Job = {
   },
 
   getDocs: async (envConfig: EnvConfig) => {
-    const res: SensorsApi = await got
+    const res: Sensor[] = await got
       .get(`${envConfig.hue.api.host}/api/${envConfig.hue.api.key}/sensors`, {
         timeout: { request: 5000 },
       })
@@ -62,6 +90,10 @@ export const hueSensorsJob: Job = {
         ['ZLLLightLevel', 'ZLLPresence', 'ZLLTemperature'].includes(sensor.type)
       )
       .map((sensor) => {
+        const didDetectPresence =
+          new Date(sensor.state.lastupdated).getTime() >
+          Date.now() - hueSensorsJob.interval;
+
         const dateNow = new Date();
         const [room] = sensor.name.split(',');
         return {
@@ -70,16 +102,20 @@ export const hueSensorsJob: Job = {
           '@timestamp': dateNow.toISOString(),
           hour_of_day: dateNow.getHours(),
           day_of_week: dateNow.getDay(),
-          //@ts-expect-error: `productname` is optional
           product_name: sensor.productname,
           state: {
             ...sensor.state,
+            reachable: sensor.config.reachable,
             temperature:
-              'temperature' in sensor.state
+              sensor.type === 'ZLLTemperature'
                 ? sensor.state.temperature / 100
                 : undefined,
-            //@ts-expect-error: `reachable` is optional
-            reachable: sensor.config.reachable,
+            presence:
+              sensor.type === 'ZLLPresence'
+                ? sensor.state.presence || didDetectPresence
+                : undefined,
+            original_presence:
+              sensor.type === 'ZLLPresence' ? sensor.state.presence : undefined,
           },
           type: sensor.type,
         };
