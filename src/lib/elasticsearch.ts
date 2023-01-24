@@ -6,13 +6,26 @@ import { logger } from './logging';
 import { Doc, Job } from './types';
 
 export function getEsClient(envConfig: EnvConfig) {
-  return new Client({
-    cloud: { id: envConfig.elastic.cloudId },
-    auth: {
-      username: envConfig.elastic.username,
-      password: envConfig.elastic.password,
-    },
-  });
+  if (
+    !envConfig.elastic.cloudId ||
+    !envConfig.elastic.username ||
+    !envConfig.elastic.password
+  ) {
+    throw new Error('Elasticsearch configuration is missing in .env');
+  }
+
+  try {
+    return new Client({
+      cloud: { id: envConfig.elastic.cloudId },
+      auth: {
+        username: envConfig.elastic.username,
+        password: envConfig.elastic.password,
+      },
+    });
+  } catch (e) {
+    logger.error('Error creating Elasticsearch client');
+    throw e;
+  }
 }
 
 export async function rollover(esClient: Client, job: Job) {

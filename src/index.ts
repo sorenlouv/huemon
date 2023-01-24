@@ -42,10 +42,12 @@ const { onlyIngest, onlySetup } = argv;
 const p = argv.reset
   ? reset(selectedJobs)
   : init(selectedJobs, { onlyIngest, onlySetup });
+
 p.then(() => {
   logger.info('✅ Started huemon successfully');
 }).catch((e) => {
-  logger.error('❌ Could not start huemon', e);
+  logger.error(`❌ Could not start huemon: ${e.message}`);
+  logger.error(e.stack);
 
   if (e.response) {
     logger.info(e.request.options.url.href);

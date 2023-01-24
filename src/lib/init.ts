@@ -1,4 +1,5 @@
 import { Client } from '@elastic/elasticsearch';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import got from 'got';
 import { merge } from 'lodash';
 import { getCommonFieldMappings } from './common_fields';
@@ -67,22 +68,38 @@ async function runIngest(envConfig: EnvConfig, esClient: Client, job: Job) {
 }
 
 async function setupStep(envConfig: EnvConfig, esClient: Client, job: Job) {
-  await esClient.indices.putIndexTemplate({
-    name: job.indexTemplateName,
-    create: false, // allow updating existing template
-    body: {
-      index_patterns: [job.indexPattern.title],
-      data_stream: {},
-      template: {
-        settings: { number_of_shards: 1 },
-        mappings: merge(job.indexTemplateMappings, getCommonFieldMappings()),
+  try {
+    await esClient.indices.putIndexTemplate({
+      name: job.indexTemplateName,
+      create: false, // allow updating existing template
+      body: {
+        index_patterns: [job.indexPattern.title],
+        data_stream: {},
+        template: {
+          settings: { number_of_shards: 1 },
+          mappings: merge(job.indexTemplateMappings, getCommonFieldMappings()),
+        },
       },
-    },
-  });
-  // setup ES (index templates, data streams etc)
-  logger.info(`Created index template "${job.indexTemplateName}"`);
+    });
 
-  await rollover(esClient, job);
+    // setup ES (index templates, data streams etc)
+    logger.info(`Created index template "${job.indexTemplateName}"`);
 
-  await createIndexPattern(envConfig, job);
+    await rollover(esClient, job);
+
+    await createIndexPattern(envConfig, job);
+  } catch (e) {
+    if (e instanceof ResponseError) {
+      if (e.statusCode === 409) {
+        logger.info(
+          `Job "${job.indexTemplateName}": Index template already exists`
+        );
+      } else {
+        logger.error(
+          `Job "${job.indexTemplateName}": Error creating index template: ${e.body.error?.reason}`
+        );
+      }
+    }
+    throw e;
+  }
 }
