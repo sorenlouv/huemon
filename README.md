@@ -18,7 +18,10 @@ cd /opt/huemon
 touch .env
 ```
 
-Update `/opt/huemon/.env` with the following example config ([get API key](https://developers.meethue.com/develop/hue-api-v2/getting-started/)):
+Update `/opt/huemon/.env` with the following example config:
+
+[Hue API key](https://developers.meethue.com/develop/hue-api-v2/getting-started/)
+[Awair Developer Console](https://developer.getawair.com/console/access-token)
 
 ```
 HUE_API_HOST = http://192.168.1.111
