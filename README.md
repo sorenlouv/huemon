@@ -18,27 +18,15 @@ cd /opt/huemon
 touch .env
 ```
 
-Update `/opt/huemon/.env` with the following example config:
-
-[Hue API key](https://developers.meethue.com/develop/hue-api-v2/getting-started/)
-
-[Awair Developer Console](https://developer.getawair.com/console/access-token)
+Update `/opt/huemon/.env` with the following example config ([get API key](https://developers.meethue.com/develop/hue-api-v2/getting-started/)):
 
 ```
-# Hue
 HUE_API_HOST = http://192.168.1.111
-HUE_API_KEY = verysecret
+HUE_API_KEY = k-abcdef
 
-# Awair
-AWAIR_DEVICE_TYPE = awair-element
-AWAIR_DEVICE_ID = 1234
-AWAIR_TOKEN = verysecret
-
-# Elastic
 ELASTIC_USERNAME = elastic
 ELASTIC_PASSWORD = changeme
-ELASTIC_CLOUD_ID = cloudname:verysecret
-
+ELASTIC_CLOUD_ID = somename:abcd==
 ```
 
 ```

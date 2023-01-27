@@ -6,6 +6,11 @@ import { logger } from './lib/logging';
 import { reset } from './reset';
 
 const { argv } = yargs(hideBin(process.argv))
+  .option('onlyDisplay', {
+    default: false,
+    type: 'boolean',
+    description: 'Only display the documents',
+  })
   .option('onlySetup', {
     default: false,
     type: 'boolean',
@@ -37,11 +42,11 @@ const selectedJobs = jobs.filter((job) => {
   return argv.job.includes(job.name);
 });
 
-const { onlyIngest, onlySetup } = argv;
+const { onlyIngest, onlySetup, onlyDisplay } = argv;
 
 const p = argv.reset
   ? reset(selectedJobs)
-  : init(selectedJobs, { onlyIngest, onlySetup });
+  : init(selectedJobs, { onlyDisplay, onlyIngest, onlySetup });
 
 p.then(() => {
   logger.info('✅ Started huemon successfully');

@@ -11,14 +11,40 @@ import { Doc, Job } from './types';
 
 export async function init(
   jobs: Job[],
-  { onlyIngest, onlySetup }: { onlyIngest: boolean; onlySetup: boolean }
+  {
+    onlyDisplay,
+    onlyIngest,
+    onlySetup,
+  }: { onlyDisplay: boolean; onlyIngest: boolean; onlySetup: boolean }
 ) {
   const envConfig = getEnvConfig();
   const esClient = getEsClient(envConfig);
 
   const promises = jobs.map(async (job) => {
+    if (onlyDisplay) {
+      try {
+        const docs = await job.getDocs(envConfig);
+        console.log(JSON.stringify(docs, null, 2));
+      } catch (e) {
+        logger.error(
+          //@ts-expect-error
+          `An error occurred while getting docs for job "${job.name}": ${e.message}`
+        );
+        throw e;
+      }
+      return;
+    }
+
     if (!onlyIngest) {
-      await setupStep(envConfig, esClient, job);
+      try {
+        await setupStep(envConfig, esClient, job);
+      } catch (e) {
+        logger.error(
+          //@ts-expect-error
+          `An error occurred while setting up job "${job.name}": ${e.message}`
+        );
+        throw e;
+      }
     }
 
     if (!onlySetup) {
@@ -28,7 +54,15 @@ export async function init(
         }s`
       );
 
-      await runIngest(envConfig, esClient, job);
+      try {
+        await runIngest(envConfig, esClient, job);
+      } catch (e) {
+        logger.error(
+          //@ts-expect-error
+          `An error occurred while ingesting for job "${job.name}": ${e.message}`
+        );
+        throw e;
+      }
       setInterval(() => runIngest(envConfig, esClient, job), job.interval);
     }
   });
