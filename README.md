@@ -21,6 +21,7 @@ touch .env
 Update `/opt/huemon/.env` with the following example config:
 
 [Hue API key](https://developers.meethue.com/develop/hue-api-v2/getting-started/)
+
 [Awair Developer Console](https://developer.getawair.com/console/access-token)
 
 ```
