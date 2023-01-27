@@ -24,12 +24,20 @@ Update `/opt/huemon/.env` with the following example config:
 [Awair Developer Console](https://developer.getawair.com/console/access-token)
 
 ```
+# Hue
 HUE_API_HOST = http://192.168.1.111
-HUE_API_KEY = k-abcdef
+HUE_API_KEY = verysecret
 
+# Awair
+AWAIR_DEVICE_TYPE = awair-element
+AWAIR_DEVICE_ID = 1234
+AWAIR_TOKEN = verysecret
+
+# Elastic
 ELASTIC_USERNAME = elastic
 ELASTIC_PASSWORD = changeme
-ELASTIC_CLOUD_ID = somename:abcd==
+ELASTIC_CLOUD_ID = cloudname:verysecret
+
 ```
 
 ```
